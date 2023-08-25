@@ -1,0 +1,165 @@
+package com.mycompany.project1.parser;
+class Parser;
+
+parser code {:
+        
+        public Parser(Lexer lexer){
+                super(lexer);
+        }
+
+
+        @Override
+        public void syntax_error(java_cup.runtime.Symbol s){
+            try{
+                Token T = (Token) s.value;
+                if(T.getValue() != null)
+                m.Error("Error con: " + T.getValue() + " LINEA: " + T.getLine());
+                else
+                m.Error("Error con: " + ParserSym.terminalNames[T.getType()] + " LINEA: " + T.getLine());
+            }catch(Exception e){
+             
+                m.Error("Error con: " + s.value + " LINEA: " + s.left);
+                
+            }
+        } 
+        
+        @Override
+        public void report_error(String message, Object info) {
+        
+        }
+    
+        @Override
+        public void unrecovered_syntax_error(java_cup.runtime.Symbol s) throws java.lang.Exception{
+        }   
+
+        
+        
+:}
+
+
+//TERMINALES
+terminal Token id,int,decimal,var,entero,doble,boolean,pista,caracter,cadena,si,sino,switch,caso,salir,default,para,mientras,
+hacer,continuar,retorna,reproducir,esperar,ordenar,sumarizar,longitud,mensaje,principal,lista,pistas,arreglo,extiende;
+
+terminal Token igual,diferente,mayor,menor,mayorigual,menorigual,nulo,and,nand,or,nor,xor,not,mas,menos,div,mult,modulo,
+potencia,dpuntos,coma,pcoma,comillas,parentc,parenta,keyO,keyC,corO,corC,comilla;
+
+
+//NO TERMINALES
+non terminal OPERACION,A,B,C,D;
+non terminal DPISTA,EX,OP;
+non terminal ASIGNACION,ARREGLO,SI,SWITCH,PARA,MIENTRAS,HACER,FUNCION,PROCEDIMIENTO,PRINCIPAL;
+non terminal BUCLE,ESCRIBIR,TIPOS;
+start with Initial;
+/****GRAMATICA*****/
+
+I       ::= I DPISTA {::} 
+        |   DPISTA   {::}
+        ;
+
+DPISTA  ::= pista id parenta OP parentc {::}
+        |   pista id extiende EX parenta OP parentc {::}
+        ;
+
+EX      ::= id      {::}
+        |   EX,id   {::}
+        ;
+
+OP          ::= OP OPERACIONES    {::}
+            |   OPERACIONES       {::}
+            ;
+
+OPERACIONES ::= OPERACION PCOMA   {::}
+            |   BUCLE             {::}
+            ;
+
+OPERACION   ::= ASIGNACION      {::}
+            |   ARREGLO         {::}
+            |   ESCRIBIR        {::}
+            |   INCREMENTO      {::}
+            ;
+
+BUCLE      ::=   SI              {::} 
+            |   SWITCH          {::}
+            |   PARA            {::}
+            |   MIENTRAS        {::}
+            |   HACER           {::}
+            |   FUNCION         {::}
+            |   PROCEDIMIENTO   {::}
+            |   PRINCIPAL       {::}
+            ;
+    
+
+/*OPERACIONES*/
+
+INCREMENTO  ::= id mas mas          {::}
+            |   id  menos menos     {::}
+            |   id mas igual        {::}
+            ;
+
+ASIGNACION  ::= var TIPO VARIABLE  igual OPERACION      {::}
+            |   Keep var TIPO VARIABLE igual OPERACION  {::}
+            |   var VARIABLE                            {::}
+            |   Keep var VARIABLE                       {::}   
+            ;
+
+VARIABLE    ::= VARIABLE coma id    {::}
+            |   id                  {::}
+            ;
+
+ARREGLO     ::= var TIPO arreglo id DIMENSION   {::}
+            ;
+
+
+DIMENSION   ::= corO OPERACION corC   {::}
+            ;
+
+DIMENSION   ::= DIMENSION D         {::}
+            |   D                   {::}
+            ;
+
+
+
+TIPO        ::= entero      {::}
+            |   doble       {::}
+            |   boolean     {::}
+            |   caracter    {::}
+            |   cadena      {::}
+            ;
+
+
+
+
+
+
+
+
+
+
+/*BUCLES*/
+
+
+OPERACION       ::= A:n1  {:RESULT = n1;:}
+                ;
+
+A               ::= A:n1 ADD B:n2   {:RESULT = n1 + "+"+n2; :}
+                |   A:n1 MENOS B:n2 {:RESULT = n1 + "-"+n2; :}
+                |   B:n1            {:RESULT = n1;:} 
+                ;
+
+B               ::= B:n1 MULT C:n2   {:RESULT = n1 + "*" + n2;:}
+                |   B:n1 div  C:n3   {}  
+                |   B:n1 modulo C:n3 {}
+                |   C:n1             {:RESULT = n1;:}
+                ;
+
+C               ::= parenta A:n1 parentc   {::}
+                |   C:n1 potencia D:n2     {::}
+                |   D                      {::}
+                ;
+
+D               ::= int:n1          {:RESULT = String.valueOf(n1);:}
+                |   decimal:n1      {:RESULT = String.valueOf(n1);:}
+                |   id:n1           {:RESULT = n1;:}
+                |   cadena:n1       {:RESULT = n1;:}
+                ;
